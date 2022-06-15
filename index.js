@@ -51,6 +51,31 @@ mqttClient.on('connect', () => {
     mqttClient.publish(`${mqttBaseTopic}/bridge/state`, 'online');
     mqttClient.subscribe(`${mqttBaseTopic}/#`);
 
+    setTimeout(async () => {
+        // Sending a set state
+        const deviceIdLivingRoom = '502cc63d12ee'
+        const cmdResult = await deviceManager.setDeviceState(deviceIdLivingRoom, {
+            "Pow": 1,
+            "Mod": 1,
+            "TemUn": 0,
+            "SetTem": 25,
+            "TemRec": 0,
+            "WdSpd": 1,
+            "Air": 0,
+            "Blo": 0,
+            "Health": 0,
+            "SwhSlp": 0,
+            "Lig": 1,
+            "SwingLfRig": 0,
+            "SwUpDn": 2,
+            "Quiet": 0,
+            "Tur": 0,
+            "SvSt": 0,
+            "TemSen": 26
+        });
+        mqttClient.publish(`${mqttBaseTopic}/${deviceIdLivingRoom}/status`, JSON.stringify(cmdResult));
+    }, 4500)
+
     mqttClient.on('message', async (topic, message) => {
         let matches;
 
@@ -69,7 +94,26 @@ mqttClient.on('connect', () => {
                 }
 
                 if (command === 'set') {
-                    const cmdResult = await deviceManager.setDeviceState(deviceId, JSON.parse(message));
+                    // const cmdResult = await deviceManager.setDeviceState(deviceId, JSON.parse(message));
+                    const cmdResult = await deviceManager.setDeviceState(deviceId, JSON.parse({
+                        "Pow": 0,
+                        "Mod": 1,
+                        "TemUn": 0,
+                        "SetTem": 25,
+                        "TemRec": 0,
+                        "WdSpd": 1,
+                        "Air": 0,
+                        "Blo": 0,
+                        "Health": 0,
+                        "SwhSlp": 0,
+                        "Lig": 1,
+                        "SwingLfRig": 0,
+                        "SwUpDn": 2,
+                        "Quiet": 0,
+                        "Tur": 0,
+                        "SvSt": 0,
+                        "TemSen": 26
+                    }));
                     mqttClient.publish(`${mqttBaseTopic}/${deviceId}/status`, JSON.stringify(cmdResult));
                 }
             }
